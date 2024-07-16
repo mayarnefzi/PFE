@@ -57,6 +57,93 @@ class SiteGSMController extends Controller
     }
 
 
+    //////////////showparamarchive
+
+
+
+
+
+    ///////////////show docfinanciere TB 
+
+    public function showDocFinanciere($codesite)
+    {
+        $site = SiteGSM::where('codesite', $codesite)->first();
+    
+        if (!$site) {
+            return response()->json(['message' => 'Site not found'], 404);
+        }
+    
+        $docFinanciere = Docfinanciere::find($site->iddocfin);
+    
+        if (!$docFinanciere) {
+            return response()->json(['message' => 'Document not found'], 404);
+        }
+    
+        // Ensure the path to the contract file is correct
+        $contractPath = '' . $docFinanciere->contract;
+        $contractUrl = url('storage/' . $contractPath);
+    
+        return response()->json([
+            'docFinanciere' => $docFinanciere,
+            'contract_url' => $contractUrl
+        ]);
+
+    }
+/////////////////////////////Show Archive TB 
+
+
+public function showArchive($codesite)
+{
+    // Trouver le SiteGSM par codesite
+    $site = SiteGSM::where('codesite', $codesite)->first();
+
+    if (!$site) {
+        return response()->json(['message' => 'Site not found'], 404);
+    }
+
+    // Trouver l'enregistrement archive par l'idArchive2 du site
+    $archive = Paramarchive2::find($site->idArchive2);
+
+    if (!$archive) {
+        return response()->json(['message' => 'Archive not found'], 404);
+    }
+
+    // Construire les URLs des fichiers s'ils existent
+    $ficheMisServiceUrl = $archive->ficheMisService ? url('storage/' . $archive->ficheMisService) : null;
+    $APDUrl = $archive->APD ? url('storage/' . $archive->APD) : null;
+    $ficheExpUrl = $archive->ficheExp ? url('storage/' . $archive->ficheExp) : null;
+
+    return response()->json([
+        
+        'archive' => $archive,
+        'ficheMisService_url' => $ficheMisServiceUrl,
+        'APD_url' => $APDUrl,
+        'ficheExp_url' => $ficheExpUrl,
+    ]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+///////////////////////////////////////////////////////////////
     public function destroysite($codesite)
     {
         $sites = SiteGSM::where('codesite', $codesite)->get();
@@ -116,15 +203,23 @@ public function associateArchive(Request $request, $codesite)
     // Validate incoming request data
     $validatedData = $request->validate([
         'idArchive' => 'required|numeric',
-        'ficheMisService' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        'APD' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        'ficheExp' => 'required|file|mimes:pdf,doc,docx|max:2048',
+        'ficheMisService' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        'APD' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        'ficheExp' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
     ]);
 
-    // Store uploaded files
-    $ficheMisService = $request->file('ficheMisService')->store('fiche');
-    $APD = $request->file('APD')->store('fiche');
-    $ficheExp = $request->file('ficheExp')->store('fiche');
+    // Store uploaded files in the public disk if they are present
+    if ($request->hasFile('ficheMisService')) {
+        $filePaths['ficheMisService'] = $request->file('ficheMisService')->store('fiche', 'public');
+    }
+
+    if ($request->hasFile('APD')) {
+        $filePaths['APD'] = $request->file('APD')->store('fiche', 'public');
+    }
+
+    if ($request->hasFile('ficheExp')) {
+        $filePaths['ficheExp'] = $request->file('ficheExp')->store('fiche', 'public');
+    }
 
     // Create ParamArchive record with file paths
     $paramArchive = ParamArchive::create([
@@ -212,173 +307,77 @@ public function associateArchive(Request $request, $codesite)
             return response()->json(['success' => false, 'message' => 'Site introuvable.']);
         }
     }
-///////////////////////////////// finance edit function 
-
-// public function updateDocFinanciere(Request $request, $codesite)
-// {
-//     // Find the SiteGSM by codesite
-//     $siteGSM = SiteGSM::where('codesite', $codesite)->first();
-
-//     if (!$siteGSM) {
-//         return response()->json(['message' => 'Site not found'], 404);
-//     }
-
-//     // Find the associated DocFinanciere by iddocfin
-//     $docFinanciere = DocFinanciere::find($siteGSM->iddocfin);
-
-//     if (!$docFinanciere) {
-//         return response()->json(['message' => 'DocFinanciere not found'], 404);
-//     }
-
-//     // Update contract file if provided
-//     if ($request->hasFile('contract')) {
-//         $contract = $request->file('contract')->store('contracts');
-//         $docFinanciere->contract = $contract;
-        
-//     }
-
-//     // Update other fields if provided
-//     if ($request->filled('propritere')) {
-//         $docFinanciere->propritere = $request->input('propritere');
-//     }
-//     if ($request->filled('montant')) {
-//         $docFinanciere->montant = $request->input('montant');
-//     }
-//     if ($request->filled('datecontract')) {
-//         $docFinanciere->datecontract = $request->input('datecontract');
-//     }
-//     if ($request->filled('datemaj')) {
-//         $docFinanciere->datemaj = $request->input('datemaj');
-//     }
-
-//     // Save the updated DocFinanciere
-//     $docFinanciere->save();
-
-//     // Return the updated DocFinanciere with iddocfin and all columns
-//     return response()->json([
-//         'message' => 'DocFinanciere updated successfully',
-//         'docFinanciere' => $docFinanciere
-//     ]);
-// }
-
-// public function updateDocFinanciere(Request $request, $codesite)
-// {
-//     // Find the SiteGSM by codesite
-//     $siteGSM = SiteGSM::where('codesite', $codesite)->first();
-
-//     if (!$siteGSM) {
-//         return response()->json(['message' => 'Site not found'], 404);
-//     }
-
-//     // Find the associated DocFinanciere by iddocfin
-//     $docFinanciere = DocFinanciere::find($siteGSM->iddocfin);
-
-//     if (!$docFinanciere) {
-//         return response()->json(['message' => 'DocFinanciere not found'], 404);
-//     }
-
-//     // Get the current values
-//     $currentValues = $docFinanciere->toArray();
-
-//     // Update contract file if provided
-//     if ($request->hasFile('contract')) {
-//         $contract = $request->file('contract')->store('contracts');
-//         $docFinanciere->contract = $contract;
-//     }
-
-//     // Update other fields if provided
-//     foreach ($request->all() as $key => $value) {
-//         if (array_key_exists($key, $currentValues) && $value !== $currentValues[$key]) {
-//             $docFinanciere->$key = $value;
-//         }
-//     }
-
-//     // Save the updated DocFinanciere
-//     $docFinanciere->save();
-
-//     // Return the updated DocFinanciere with iddocfin and all columns
-//     return response()->json([
-//         'message' => 'DocFinanciere updated successfully',
-//         'docFinanciere' => $docFinanciere
-//     ]);
-// }
-
-// public function updateDocFinanciere(Request $request, $iddocfin)
-// {
-//     // Validate incoming request data for the resource update
-//     $validator = Validator::make($request->all(), [
-//         'propritere' => 'required|string',
-//         'montant' => 'required|numeric',
-//         'datecontract' => 'required|date',
-//         'datemaj' => 'required|date',
-//     ]);
-
-//     // Check if validation fails
-//     if ($validator->fails()) {
-//         return response()->json(['error' => $validator->errors()], 400);
-//     }
-
-//     // Find the DocFinanciere record by iddocfin
-//     $docFin = DocFinanciere::find($iddocfin);
-
-//     // Check if the record exists
-//     if (!$docFin) {
-//         return response()->json(['error' => 'DocFinanciere not found'], 404);
-//     }
-
-//     // Update other fields with request data
-//     $docFin->propritere = $request->input('propritere');
-//     $docFin->montant = $request->input('montant');
-//     $docFin->datecontract = $request->input('datecontract');
-//     $docFin->datemaj = $request->input('datemaj');
-
-//     // Save the updated record
-//     $docFin->save();
-
-//     // Log the update
-//     Log::info('DocFinanciere updated: ' . $iddocfin);
-
-//     // Return success response
-//     return response()->json(['message' => 'DocFinanciere updated successfully'], 200);
-// }
 
 
 ///////////////////////////////archive2avec idauto
+// public function associateparamarchive2(Request $request, $codesite)
+// {
+//     // Find the SiteGSM by codesite
+//     $siteGSM = SiteGSM::where('codesite', $codesite)->first();
+
+//     if (!$siteGSM) {
+//         return response()->json(['message' => 'Site not found'], 404);
+//     }
+
+//     // Validate incoming request data
+//     $validatedData = $request->validate([
+//         'ficheMisService' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+//         'APD' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+//         'ficheExp' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+//     ]);
+
+//     // // Store uploaded files if they exist, otherwise set to null
+//     $ficheMisService = $request->hasFile('ficheMisService') ? $request->file('ficheMisService')->store('fiche') : null;
+//     $APD = $request->hasFile('APD') ? $request->file('APD')->store('fiche') : null;
+//     $ficheExp = $request->hasFile('ficheExp') ? $request->file('ficheExp')->store('fiche') : null;
+//     // Create ParamArchive2 record with file paths
+//     $paramarchive2 = Paramarchive2::create([
+//         'ficheMisService' => $ficheMisService,
+//         'APD' => $APD,
+//         'ficheExp' => $ficheExp,
+//     ]);
+
+//     // Update SiteGSM with idArchive2
+//     $siteGSM->idArchive2 = $paramarchive2->idArchive2;
+//     $siteGSM->save();
+
+//     return response()->json(['message' => 'paramarchive associated with site successfully']);
+// }
 public function associateparamarchive2(Request $request, $codesite)
 {
-    // Find the SiteGSM by codesite
+    // Trouver le SiteGSM par codesite
     $siteGSM = SiteGSM::where('codesite', $codesite)->first();
 
     if (!$siteGSM) {
         return response()->json(['message' => 'Site not found'], 404);
     }
 
-    // Validate incoming request data
+    // Valider les données de la requête entrante
     $validatedData = $request->validate([
         'ficheMisService' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         'APD' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         'ficheExp' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
     ]);
 
-    // Store uploaded files if they exist, otherwise set to null
-    $ficheMisService = $request->hasFile('ficheMisService') ? $request->file('ficheMisService')->store('fiche') : null;
-    $APD = $request->hasFile('APD') ? $request->file('APD')->store('fiche') : null;
-    $ficheExp = $request->hasFile('ficheExp') ? $request->file('ficheExp')->store('fiche') : null;
+    // Stocker les fichiers téléchargés dans le disque public s'ils existent, sinon les définir sur null
+    $ficheMisService = $request->hasFile('ficheMisService') ? $request->file('ficheMisService')->storeAs('fiche', $request->file('ficheMisService')->getClientOriginalName(), 'public') : null;
+    $APD = $request->hasFile('APD') ? $request->file('APD')->storeAs('fiche', $request->file('APD')->getClientOriginalName(), 'public') : null;
+    $ficheExp = $request->hasFile('ficheExp') ? $request->file('ficheExp')->storeAs('fiche', $request->file('ficheExp')->getClientOriginalName(), 'public') : null;
 
-    // Create ParamArchive2 record with file paths
+    // Créer un enregistrement ParamArchive2 avec les chemins de fichiers
     $paramarchive2 = Paramarchive2::create([
         'ficheMisService' => $ficheMisService,
         'APD' => $APD,
         'ficheExp' => $ficheExp,
     ]);
 
-    // Update SiteGSM with idArchive2
+    // Mettre à jour SiteGSM avec idArchive2
     $siteGSM->idArchive2 = $paramarchive2->idArchive2;
     $siteGSM->save();
 
-    return response()->json(['message' => 'paramarchive associated with site successfully']);
+    return response()->json(['message' => 'Paramarchive associated with site successfully']);
 }
-
+/////////////////
 
     
 //////////////////////get sites by delegation

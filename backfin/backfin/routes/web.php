@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Include admin routes
+Route::prefix('admin')->group(function () {
+    Route::middleware('web')->group(base_path('routes/admin.php'));
+});

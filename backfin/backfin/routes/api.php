@@ -9,6 +9,11 @@ use App\Http\Controllers\docFinanceController;
 use App\Http\Controllers\cellule2GController;
 use App\Http\Controllers\cellule3GController;
 use App\Http\Controllers\cellule4GController;
+use App\Http\Controllers\RegionController;
+use App\Http\Controllers\DelegationController;
+use App\Http\Controllers\SecteurController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +60,11 @@ Route::post('connexion', 'App\Http\Controllers\UtilisateurController@connexion')
 Route::post('storesite', 'App\Http\Controllers\SiteGSMController@storesite');
 Route::get('showsite','App\Http\Controllers\SiteGSMController@show');
 Route::get('showsiteid/{id}','App\Http\Controllers\SiteGSMController@showid');
+//////////////////////method get docfin from codesite 
+Route::get('showdocfinTB/{id}','App\Http\Controllers\SiteGSMController@showDocFinanciere');
+Route::get('showArchivTB/{id}','App\Http\Controllers\SiteGSMController@showArchive');
+
+
 Route::delete('deletesite/{id}', 'App\Http\Controllers\SiteGSMController@destroysite');
 Route::put('updatesite/{id}', 'App\Http\Controllers\SiteGSMController@updatesite');
 Route::get('getsiteid/{codesite}','App\Http\Controllers\SiteGSMController@getIdSiteByCodeSite');
@@ -67,18 +77,44 @@ Route::post('cel2Gadd/{idSite}', 'App\Http\Controllers\cellule2GController@store
 Route::put('cel2Gupdate/{idCel}', 'App\Http\Controllers\cellule2GController@update');
 Route::get('getidCel2G/{codeCellule}','App\Http\Controllers\cellule2GController@getidCelBycodeCellule');
 Route::get('showidCel2G/{idCel}','App\Http\Controllers\cellule2GController@showid');
+Route::get('showCel2Gbycode/{codesite}','App\Http\Controllers\cellule2GController@showCellulesByCodeSite');
 
 //////////////////////////clellule3G api cellule3GController
 Route::post('cel3Gadd/{idSite}', 'App\Http\Controllers\cellule3GController@store');
 Route::put('cel3Gupdate/{idcel}', 'App\Http\Controllers\cellule3GController@update');
 Route::get('getidCel3G/{codeCellule}','App\Http\Controllers\cellule3GController@getidCelBycodeCellule');
 Route::get('showidCel3G/{idcel}','App\Http\Controllers\cellule3GController@showid');
-
+Route::get('showCel3Gbycode/{codesite}','App\Http\Controllers\cellule3GController@showCellulesByCodeSite');
 //////////////////////////clellule4G api cellule4GController
 Route::post('cel4Gadd/{idSite}', 'App\Http\Controllers\cellule4GController@store');
 Route::put('cel4Gupdate/{idCel}', 'App\Http\Controllers\cellule4GController@update');
 Route::get('getidCel4G/{codeCellule}','App\Http\Controllers\cellule4GController@getidCelBycodeCellule');
 Route::get('showidCel4G/{idCel}','App\Http\Controllers\cellule4GController@showid');
+Route::get('showCel4Gbycode/{codesite}','App\Http\Controllers\cellule4GController@showCellulesByCodeSite');
+
+/////////////////////////////////Gerer Region 
+Route::post('AddReg', 'App\Http\Controllers\RegionController@store');
+Route::get('GetAll', 'App\Http\Controllers\RegionController@getall');
+Route::delete('DeleteByName/{libelleReg}', 'App\Http\Controllers\RegionController@deleteByName');
+Route::delete('deleteByIdReg/{idReg}', 'App\Http\Controllers\RegionController@deleteByIdReg');
+Route::put('update/{idReg}', 'App\Http\Controllers\RegionController@update');
+
+/////////////////////////////////Gerer Delegation
+Route::get('delegations', 'App\Http\Controllers\DelegationController@index');
+Route::post('delegations', 'App\Http\Controllers\DelegationController@store');
+Route::get('delegations/{id}', 'App\Http\Controllers\DelegationController@show');
+Route::put('delegations/{id}', 'App\Http\Controllers\DelegationController@update');
+Route::delete('delegations/{id}', 'App\Http\Controllers\DelegationController@destroy');
+
+/////////////////////////////////Gerer Secteur
+Route::get('secteurs', 'App\Http\Controllers\SecteurController@index');
+Route::post('secteur', 'App\Http\Controllers\SecteurController@store');
 
 
-/////////////////////////////////TableBoardSITE
+
+
+
+
+
+
+

@@ -123,6 +123,27 @@ public function showid($idcel)
 }
 
 
+public function showCellulesByCodeSite($codesite)
+{
+    // Fetch the SiteGSM by codesite
+    $site = SiteGSM::where('codesite', $codesite)->first();
+
+    // Check if the site exists
+    if (!$site) {
+        return response()->json(['message' => 'Site not found'], 404);
+    }
+
+    // Fetch all Cellule2G records where idSite matches the site's idSite
+    $cellules = Cellule3G::where('idSite', $site->idSite)->get();
+
+    // Check if there are any cellules
+    if ($cellules->isEmpty()) {
+        return response()->json(['message' => 'No cellules found for this site'], 404);
+    }
+
+    // Return the cellules
+    return response()->json($cellules, 200);
+}
 
 
 

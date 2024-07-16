@@ -33,8 +33,9 @@ class docFinanceController extends Controller
             // Handle file upload
             if ($request->hasFile('contract')) {
                 $file = $request->file('contract');
-                $contractPath = $file->store('contracts');
-    
+                $originalName = $file->getClientOriginalName();
+                // $contractPath = $file->store('contracts');
+                $contractPath = $file->storeAs('contracts', $originalName, 'public');
                 // Update the contract path in the DocFinanciere record
                 $docFin->contract = $contractPath;
                 $docFin->save();

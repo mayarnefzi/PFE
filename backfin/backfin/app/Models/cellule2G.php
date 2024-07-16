@@ -50,7 +50,7 @@ class cellule2G extends Model
 
 
 
-    
+      
 }
 
 
